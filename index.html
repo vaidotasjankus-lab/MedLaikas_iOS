@@ -6,6 +6,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>MedLaikas</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1A6FD4">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -580,7 +582,26 @@
   </div>
   <div class="welcome-title">Būk sveikas!</div>
   <div class="welcome-sub">Jūsų vaistų priminimų programa</div>
-  <button class="btn-welcome" onclick="goTo('main')">PRADĖTI</button>
+
+  <div style="
+    background: rgba(255,255,255,0.15);
+    border: 1.5px solid rgba(255,255,255,0.3);
+    border-radius: 16px;
+    padding: 18px 20px;
+    margin: 24px 0;
+    text-align: left;
+  ">
+    <div style="color:#fff;font-size:13px;font-weight:700;margin-bottom:10px;letter-spacing:0.5px">⚠️ SVARBUS ĮSPĖJIMAS</div>
+    <div style="color:rgba(255,255,255,0.9);font-size:13px;font-weight:600;line-height:1.6">
+      Ši programa yra skirta tik kaip pagalbinė priemonė vaistų vartojimo priminimams. Ji <strong style="color:#fff">nekeičia</strong> gydytojo konsultacijos ar recepto.<br><br>
+      Visada laikykitės gydytojo nurodymų. Programos kūrėjai neatsako už praleistar dozes ar netinkamą vaistų vartojimą.<br><br>
+      Naudodami šią programą <strong style="color:#fff">sutinkate</strong> su šiomis sąlygomis.
+    </div>
+  </div>
+
+  <button class="btn-welcome" id="btn-start" disabled onclick="goTo('main')" style="opacity:0.5;cursor:not-allowed">
+    <span id="btn-start-text">SUTINKU (10)</span>
+  </button>
 </div>
 
 <!-- MAIN / MEDICINE LIST -->
@@ -1142,6 +1163,43 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2500);
 }
 
+// ── WELCOME TIMER ──
+function startWelcomeTimer() {
+  // Jei jau matė – praleisti
+  if (localStorage.getItem('ml_launched')) return;
+  let secs = 10;
+  const btn = document.getElementById('btn-start');
+  const txt = document.getElementById('btn-start-text');
+  const interval = setInterval(() => {
+    secs--;
+    if (secs <= 0) {
+      clearInterval(interval);
+      btn.disabled = false;
+      btn.style.opacity = '1';
+      btn.style.cursor = 'pointer';
+      txt.textContent = 'SUTINKU IR PRADĖTI →';
+    } else {
+      txt.textContent = `SUTINKU (${secs})`;
+    }
+  }, 1000);
+}
+
+// ── SERVICE WORKER ──
+async function registerSW() {
+  if (!('serviceWorker' in navigator)) return;
+  try {
+    const reg = await navigator.serviceWorker.register('sw.js', { scope: '/MedLaikas_iOS/' });
+    console.log('SW registered');
+    // Pranešame SW pradėti tikrinimą
+    const sw = reg.active || reg.installing || reg.waiting;
+    if (sw) sw.postMessage({ type: 'SCHEDULE' });
+    // Kai SW taps aktyvus
+    navigator.serviceWorker.ready.then(r => {
+      r.active.postMessage({ type: 'SCHEDULE' });
+    });
+  } catch(e) { console.log('SW failed:', e); }
+}
+
 // ── INIT ──
 async function init() {
   db = await openDB();
@@ -1150,10 +1208,20 @@ async function init() {
     goTo('main');
     renderMedicines();
   }
-  // Mark launched
   localStorage.setItem('ml_launched', '1');
 
-  // Listen for iOS notification confirmations
+  // Paleidžiame laikmatį welcome ekrane
+  startWelcomeTimer();
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission().then(p => {
+      if (p === 'granted') showToast('✅ Pranešimai įjungti!');
+    });
+  }
+
+  // Registruojame Service Worker
+  registerSW();
+
+  // iOS bridge
   window.medlaikasNotificationConfirmed = function(medId, time) {
     dbPut('history', { medicineId: parseInt(medId), timestamp: Date.now() });
     renderMedicines();
