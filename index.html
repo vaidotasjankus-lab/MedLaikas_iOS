@@ -600,7 +600,7 @@
         <button class="btn-secondary" onclick="goTo('history')">VARTOJIMO<br>ISTORIJA</button>
         <button class="btn-secondary" onclick="showToast('Globėjo kontaktai — V2.0')">GLOBĖJO<br>KONTAKTAI</button>
       </div>
-      <button class="btn-outline" onclick="showToast('Garso nustatymai — greitai!')">KEISTI PRIMINIMO GARSĄ</button>
+      <button class="btn-outline" onclick="openSoundModal()">🔔 KEISTI PRIMINIMO GARSĄ</button>
       <button class="btn-green" onclick="goTo('report')">PARODYTI VAISTININKUI / GYDYTOJUI</button>
     </div>
     <div class="divider"></div>
@@ -627,10 +627,14 @@
       <div class="form-group">
         <div class="form-label">Nuotrauka</div>
         <div class="img-picker">
-          <div class="img-preview" id="img-preview" onclick="document.getElementById('img-input').click()">📷</div>
-          <div class="img-hint">Palieskite norėdami<br>pasirinkti nuotrauką</div>
+          <div class="img-preview" id="img-preview">📷</div>
+          <div style="display:flex;flex-direction:column;gap:8px;flex:1">
+            <button class="btn-outline" onclick="document.getElementById('img-input').click()" style="padding:12px;font-size:13px">📷 Fotografuoti</button>
+            <button class="btn-outline" onclick="document.getElementById('img-input-gallery').click()" style="padding:12px;font-size:13px">🖼 Pasirinkti iš galerijos</button>
+          </div>
         </div>
-        <input type="file" id="img-input" accept="image/*" style="display:none" onchange="handleImage(this)">
+        <input type="file" id="img-input" accept="image/*" capture="environment" style="display:none" onchange="handleImage(this)">
+        <input type="file" id="img-input-gallery" accept="image/*" style="display:none" onchange="handleImage(this)">
       </div>
 
       <div class="form-group">
@@ -683,6 +687,16 @@
   </div>
   <div class="content">
     <div id="report-content"></div>
+  </div>
+</div>
+
+<!-- SOUND MODAL -->
+<div class="modal-overlay" id="sound-modal" onclick="closeSoundModal()">
+  <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-title">🔔 Priminimo garsas</div>
+    <div id="sound-options" style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px"></div>
+    <button class="modal-btn cancel" onclick="closeSoundModal()">Uždaryti</button>
   </div>
 </div>
 
@@ -1024,7 +1038,103 @@ function scheduleWebNotifications(med) {
   });
 }
 
-// ── TOAST ──
+// ── SOUND SELECTION ──
+const SOUNDS = [
+  { id: 'bell',    label: '🔔 Skambutis',     desc: 'Klasikinis' },
+  { id: 'gentle',  label: '🎵 Švelnus tonas',  desc: 'Ramus' },
+  { id: 'digital', label: '📳 Skaitmeninis',   desc: 'Modernus' },
+  { id: 'chime',   label: '🎶 Varpeliai',      desc: 'Malonus' },
+];
+
+let selectedSound = localStorage.getItem('ml_sound') || 'bell';
+
+function playSound(id) {
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const g = ctx.createGain();
+  g.connect(ctx.destination);
+
+  const sounds = {
+    bell: () => {
+      const o = ctx.createOscillator();
+      o.type = 'sine'; o.frequency.setValueAtTime(880, ctx.currentTime);
+      o.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.8);
+      g.gain.setValueAtTime(0.5, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.2);
+      o.connect(g); o.start(); o.stop(ctx.currentTime + 1.2);
+    },
+    gentle: () => {
+      [0, 0.15, 0.3].forEach((t, i) => {
+        const o = ctx.createOscillator();
+        o.type = 'sine'; o.frequency.value = [523, 659, 784][i];
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(0, ctx.currentTime + t);
+        gain.gain.linearRampToValueAtTime(0.3, ctx.currentTime + t + 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + t + 0.6);
+        o.connect(gain); gain.connect(ctx.destination);
+        o.start(ctx.currentTime + t); o.stop(ctx.currentTime + t + 0.6);
+      });
+    },
+    digital: () => {
+      [0, 0.2].forEach(t => {
+        const o = ctx.createOscillator();
+        o.type = 'square'; o.frequency.value = 880;
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(0.2, ctx.currentTime + t);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + t + 0.15);
+        o.connect(gain); gain.connect(ctx.destination);
+        o.start(ctx.currentTime + t); o.stop(ctx.currentTime + t + 0.15);
+      });
+    },
+    chime: () => {
+      [523, 659, 784, 1047].forEach((freq, i) => {
+        const o = ctx.createOscillator();
+        o.type = 'sine'; o.frequency.value = freq;
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(0, ctx.currentTime + i * 0.18);
+        gain.gain.linearRampToValueAtTime(0.3, ctx.currentTime + i * 0.18 + 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.18 + 0.9);
+        o.connect(gain); gain.connect(ctx.destination);
+        o.start(ctx.currentTime + i * 0.18); o.stop(ctx.currentTime + i * 0.18 + 0.9);
+      });
+    }
+  };
+  sounds[id] && sounds[id]();
+}
+
+function openSoundModal() {
+  const el = document.getElementById('sound-options');
+  el.innerHTML = SOUNDS.map(s => `
+    <div onclick="selectSound('${s.id}')" style="
+      display:flex;align-items:center;gap:14px;
+      padding:14px 16px;border-radius:14px;cursor:pointer;
+      background:${selectedSound === s.id ? 'var(--blue-bg)' : 'var(--bg)'};
+      border:2px solid ${selectedSound === s.id ? 'var(--blue)' : 'var(--border)'};
+      transition:all 0.15s">
+      <div style="flex:1">
+        <div style="font-size:15px;font-weight:800;color:var(--text)">${s.label}</div>
+        <div style="font-size:12px;color:var(--text-secondary);font-weight:600">${s.desc}</div>
+      </div>
+      <button onclick="event.stopPropagation();playSound('${s.id}')" style="
+        background:var(--blue);color:#fff;border:none;border-radius:10px;
+        padding:8px 14px;font-family:'Nunito',sans-serif;font-size:13px;
+        font-weight:700;cursor:pointer">▶ Klausyti</button>
+      ${selectedSound === s.id ? '<span style="color:var(--blue);font-size:20px">✓</span>' : '<span style="width:20px"></span>'}
+    </div>`).join('');
+  document.getElementById('sound-modal').classList.add('open');
+}
+
+function selectSound(id) {
+  selectedSound = id;
+  localStorage.setItem('ml_sound', id);
+  openSoundModal(); // re-render su nauja selekcija
+  showToast('✅ Garsas pasirinktas');
+}
+
+function closeSoundModal() {
+  document.getElementById('sound-modal').classList.remove('open');
+}
+
+
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
