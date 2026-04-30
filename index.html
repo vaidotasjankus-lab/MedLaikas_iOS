@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>MedLaikas</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue: #1A6FD4;
+    --blue-dark: #1558B0;
+    --blue-light: #4A90E2;
+    --blue-bg: #EBF3FC;
+    --green: #2E9E4F;
+    --red: #D93025;
+    --text: #1a1a2e;
+    --text-secondary: #555;
+    --border: #dde5f0;
+    --card-bg: #ffffff;
+    --bg: #f2f6fb;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── SCREENS ── */
+  .screen { display: none; min-height: 100vh; flex-direction: column; }
+  .screen.active { display: flex; }
+
+  /* ── WELCOME SCREEN ── */
+  #screen-welcome {
+    background: linear-gradient(160deg, #1A6FD4 0%, #1558B0 60%, #0e3f85 100%);
+    align-items: center;
+    justify-content: center;
+    padding: 40px 32px;
+    text-align: center;
+  }
+
+  .welcome-logo {
+    width: 110px;
+    height: 110px;
+    background: rgba(255,255,255,0.18);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 32px;
+    animation: pulse 2.5s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255,255,255,0.25); }
+    50% { box-shadow: 0 0 0 18px rgba(255,255,255,0); }
+  }
+
+  .welcome-logo svg { width: 62px; height: 62px; }
+
+  .welcome-title {
+    font-size: 38px;
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: -0.5px;
+    margin-bottom: 10px;
+  }
+
+  .welcome-sub {
+    font-size: 17px;
+    color: rgba(255,255,255,0.78);
+    font-weight: 600;
+    margin-bottom: 64px;
+  }
+
+  .btn-welcome {
+    width: 100%;
+    padding: 18px;
+    background: #fff;
+    color: var(--blue);
+    border: none;
+    border-radius: 14px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.18);
+  }
+
+  .btn-welcome:active { transform: scale(0.97); }
+
+  /* ── TOPBAR ── */
+  .topbar {
+    background: var(--blue);
+    padding: calc(var(--safe-top) + 14px) 20px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+
+  .topbar-title { color: #fff; font-size: 20px; font-weight: 800; }
+
+  .btn-support {
+    background: #fff;
+    color: var(--red);
+    border: none;
+    border-radius: 20px;
+    padding: 7px 14px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  /* ── MAIN CONTENT ── */
+  .content {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: calc(var(--safe-bottom) + 20px);
+  }
+
+  /* ── HERO SECTION ── */
+  .hero {
+    background: var(--blue);
+    padding: 0 20px 24px;
+  }
+
+  .hero-name { color: #fff; font-size: 26px; font-weight: 900; }
+  .hero-sub { color: rgba(255,255,255,0.75); font-size: 14px; font-weight: 600; }
+
+  /* ── BUTTONS ── */
+  .action-grid { padding: 20px 16px 0; display: flex; flex-direction: column; gap: 12px; }
+
+  .btn-primary {
+    width: 100%;
+    padding: 17px;
+    background: var(--blue);
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.12s;
+  }
+
+  .btn-primary:active { transform: scale(0.98); background: var(--blue-dark); }
+
+  .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .btn-secondary {
+    padding: 15px 10px;
+    background: var(--card-bg);
+    color: var(--blue);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.15s;
+  }
+
+  .btn-secondary:active { background: var(--blue-bg); }
+
+  .btn-outline {
+    width: 100%;
+    padding: 15px;
+    background: var(--card-bg);
+    color: var(--blue);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .btn-green {
+    width: 100%;
+    padding: 17px;
+    background: var(--green);
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+
+  .btn-green:active { opacity: 0.88; }
+
+  /* ── DIVIDER ── */
+  .divider { height: 1px; background: var(--border); margin: 20px 16px 0; }
+
+  /* ── MEDICINE LIST ── */
+  .medicine-list { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+
+  .medicine-card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 14px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 2px 10px rgba(26,111,212,0.08);
+    animation: slideIn 0.3s ease;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .med-img {
+    width: 64px;
+    height: 64px;
+    border-radius: 12px;
+    object-fit: cover;
+    flex-shrink: 0;
+    background: var(--blue-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+  }
+
+  .med-img img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
+
+  .med-info { flex: 1; min-width: 0; }
+
+  .med-name {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .med-times {
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--blue);
+    margin-bottom: 3px;
+  }
+
+  .med-days { font-size: 12px; color: var(--text-secondary); font-weight: 600; }
+
+  .med-actions { display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; }
+
+  .btn-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    background: var(--card-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .btn-icon:active { background: var(--blue-bg); }
+  .btn-icon.delete { border-color: #f0d0ce; }
+  .btn-icon.delete:active { background: #fdf0ef; }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-secondary);
+  }
+
+  .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+  .empty-state p { font-size: 15px; font-weight: 600; }
+
+  /* ── ADD/EDIT SCREEN ── */
+  #screen-add { background: var(--bg); }
+
+  .form-content { padding: 20px 16px; display: flex; flex-direction: column; gap: 20px; }
+
+  .form-group { display: flex; flex-direction: column; gap: 8px; }
+
+  .form-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .form-input {
+    width: 100%;
+    padding: 14px 16px;
+    background: var(--card-bg);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .form-input:focus { border-color: var(--blue); }
+
+  /* Times */
+  .times-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .time-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--card-bg);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 14px;
+  }
+
+  .time-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-family: 'Nunito', sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--blue);
+    outline: none;
+  }
+
+  .btn-add-time {
+    padding: 12px;
+    background: var(--blue-bg);
+    color: var(--blue);
+    border: 1.5px dashed var(--blue-light);
+    border-radius: 12px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: center;
+  }
+
+  /* Days */
+  .days-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+
+  .day-btn {
+    aspect-ratio: 1;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    background: var(--card-bg);
+    font-family: 'Nunito', sans-serif;
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+
+  .day-btn.active {
+    background: var(--blue);
+    border-color: var(--blue);
+    color: #fff;
+  }
+
+  /* Image picker */
+  .img-picker {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .img-preview {
+    width: 72px;
+    height: 72px;
+    border-radius: 12px;
+    background: var(--blue-bg);
+    border: 1.5px dashed var(--blue-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    cursor: pointer;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .img-preview img { width: 100%; height: 100%; object-fit: cover; }
+
+  .img-hint { font-size: 13px; color: var(--text-secondary); font-weight: 600; }
+
+  /* ── HISTORY SCREEN ── */
+  #screen-history { background: var(--bg); }
+
+  .history-list { padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+
+  .history-item {
+    background: var(--card-bg);
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 2px 8px rgba(26,111,212,0.06);
+  }
+
+  .history-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--green);
+    flex-shrink: 0;
+  }
+
+  .history-info { flex: 1; }
+  .history-name { font-size: 15px; font-weight: 700; }
+  .history-time { font-size: 13px; color: var(--text-secondary); font-weight: 600; margin-top: 2px; }
+  .history-badge {
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: #e6f7ec;
+    color: var(--green);
+  }
+
+  /* ── DOCTOR REPORT ── */
+  #screen-report { background: var(--bg); }
+
+  .report-card {
+    margin: 16px;
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(26,111,212,0.08);
+  }
+
+  .report-title { font-size: 18px; font-weight: 800; margin-bottom: 16px; color: var(--blue); }
+
+  .report-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .report-row:last-child { border-bottom: none; }
+  .report-key { font-size: 13px; color: var(--text-secondary); font-weight: 600; }
+  .report-val { font-size: 14px; font-weight: 700; text-align: right; max-width: 55%; }
+
+  /* ── BACK BTN ── */
+  .btn-back {
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 22px;
+    cursor: pointer;
+    padding: 4px 8px 4px 0;
+    display: flex;
+    align-items: center;
+  }
+
+  .topbar-left { display: flex; align-items: center; gap: 8px; }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed;
+    bottom: calc(var(--safe-bottom) + 24px);
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #1a1a2e;
+    color: #fff;
+    padding: 12px 22px;
+    border-radius: 24px;
+    font-size: 14px;
+    font-weight: 700;
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 1000;
+    white-space: nowrap;
+  }
+
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 500;
+    align-items: flex-end;
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal-sheet {
+    width: 100%;
+    background: var(--card-bg);
+    border-radius: 24px 24px 0 0;
+    padding: 20px 20px calc(var(--safe-bottom) + 20px);
+    animation: slideUp 0.3s ease;
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+
+  .modal-handle {
+    width: 40px;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin: 0 auto 20px;
+  }
+
+  .modal-title { font-size: 18px; font-weight: 800; margin-bottom: 16px; }
+
+  .modal-btn {
+    width: 100%;
+    padding: 16px;
+    border: none;
+    border-radius: 14px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-bottom: 10px;
+  }
+
+  .modal-btn.primary { background: var(--blue); color: #fff; }
+  .modal-btn.danger { background: #fdf0ef; color: var(--red); }
+  .modal-btn.cancel { background: var(--bg); color: var(--text-secondary); }
+</style>
+</head>
+<body>
+
+<!-- WELCOME -->
+<div id="screen-welcome" class="screen active">
+  <div class="welcome-logo">
+    <svg viewBox="0 0 62 62" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="31" cy="31" r="28" fill="rgba(255,255,255,0.25)" stroke="white" stroke-width="2.5"/>
+      <rect x="14" y="28" width="34" height="6" rx="3" fill="white"/>
+      <path d="M22 22 Q31 14 40 22" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <circle cx="31" cy="31" r="5" fill="white" opacity="0.6"/>
+    </svg>
+  </div>
+  <div class="welcome-title">Būk sveikas!</div>
+  <div class="welcome-sub">Jūsų vaistų priminimų programa</div>
+  <button class="btn-welcome" onclick="goTo('main')">PRADĖTI</button>
+</div>
+
+<!-- MAIN / MEDICINE LIST -->
+<div id="screen-main" class="screen">
+  <div class="topbar">
+    <span class="topbar-title">MedLaikas</span>
+    <button class="btn-support" onclick="showToast('❤️ Ačiū už palaikymą!')">❤️ PAREMK</button>
+  </div>
+  <div class="content">
+    <div class="hero">
+      <div class="hero-name">MedLaikas</div>
+      <div class="hero-sub">Mano vaistai</div>
+    </div>
+    <div class="action-grid">
+      <button class="btn-primary" onclick="goTo('add')">+ PRIDĖTI VAISTĄ</button>
+      <div class="btn-row">
+        <button class="btn-secondary" onclick="goTo('history')">VARTOJIMO<br>ISTORIJA</button>
+        <button class="btn-secondary" onclick="showToast('Globėjo kontaktai — V2.0')">GLOBĖJO<br>KONTAKTAI</button>
+      </div>
+      <button class="btn-outline" onclick="showToast('Garso nustatymai — greitai!')">KEISTI PRIMINIMO GARSĄ</button>
+      <button class="btn-green" onclick="goTo('report')">PARODYTI VAISTININKUI / GYDYTOJUI</button>
+    </div>
+    <div class="divider"></div>
+    <div class="medicine-list" id="medicine-list">
+      <div class="empty-state">
+        <div class="icon">💊</div>
+        <p>Vaistų dar nėra.<br>Paspauskite „Pridėti vaistą".</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD/EDIT -->
+<div id="screen-add" class="screen">
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="btn-back" onclick="goBack()">&#8592;</button>
+      <span class="topbar-title" id="add-title">Pridėti vaistą</span>
+    </div>
+  </div>
+  <div class="content">
+    <div class="form-content">
+
+      <div class="form-group">
+        <div class="form-label">Nuotrauka</div>
+        <div class="img-picker">
+          <div class="img-preview" id="img-preview" onclick="document.getElementById('img-input').click()">📷</div>
+          <div class="img-hint">Palieskite norėdami<br>pasirinkti nuotrauką</div>
+        </div>
+        <input type="file" id="img-input" accept="image/*" style="display:none" onchange="handleImage(this)">
+      </div>
+
+      <div class="form-group">
+        <div class="form-label">Vaisto pavadinimas</div>
+        <input type="text" class="form-input" id="med-name" placeholder="pvz. Aspirin, Vitaminas D..." />
+      </div>
+
+      <div class="form-group">
+        <div class="form-label">Dozė</div>
+        <input type="text" class="form-input" id="med-dose" placeholder="pvz. 1 tabletė, 5ml..." />
+      </div>
+
+      <div class="form-group">
+        <div class="form-label">Vartojimo laikas (-ai)</div>
+        <div class="times-list" id="times-list"></div>
+        <button class="btn-add-time" onclick="addTimeField()">+ Pridėti laiką</button>
+      </div>
+
+      <div class="form-group">
+        <div class="form-label">Vartojimo dienos</div>
+        <div class="days-grid" id="days-grid"></div>
+      </div>
+
+      <button class="btn-primary" onclick="saveMedicine()">IŠSAUGOTI</button>
+
+    </div>
+  </div>
+</div>
+
+<!-- HISTORY -->
+<div id="screen-history" class="screen">
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="btn-back" onclick="goBack()">&#8592;</button>
+      <span class="topbar-title">Vartojimo istorija</span>
+    </div>
+  </div>
+  <div class="content">
+    <div class="history-list" id="history-list"></div>
+  </div>
+</div>
+
+<!-- DOCTOR REPORT -->
+<div id="screen-report" class="screen">
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="btn-back" onclick="goBack()">&#8592;</button>
+      <span class="topbar-title">Ataskaita gydytojui</span>
+    </div>
+  </div>
+  <div class="content">
+    <div id="report-content"></div>
+  </div>
+</div>
+
+<!-- DELETE MODAL -->
+<div class="modal-overlay" id="delete-modal" onclick="closeModal()">
+  <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Ištrinti vaistą?</div>
+    <button class="modal-btn danger" onclick="confirmDelete()">🗑 Ištrinti</button>
+    <button class="modal-btn cancel" onclick="closeModal()">Atšaukti</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── STATE ──
+let currentScreen = 'welcome';
+let prevScreen = 'main';
+let db = null;
+let editingId = null;
+let deleteTargetId = null;
+let selectedDays = [1,2,3,4,5,6,7];
+let imageData = null;
+
+const DAYS = ['Pr','An','Tr','Ke','Pe','Še','Se'];
+
+// ── DB ──
+function openDB() {
+  return new Promise((res, rej) => {
+    const req = indexedDB.open('MedLaikasDB', 2);
+    req.onupgradeneeded = e => {
+      const d = e.target.result;
+      if (!d.objectStoreNames.contains('medicines')) {
+        d.createObjectStore('medicines', { keyPath: 'id', autoIncrement: true });
+      }
+      if (!d.objectStoreNames.contains('history')) {
+        d.createObjectStore('history', { keyPath: 'id', autoIncrement: true });
+      }
+    };
+    req.onsuccess = e => res(e.target.result);
+    req.onerror = e => rej(e);
+  });
+}
+
+async function dbGetAll(store) {
+  return new Promise((res, rej) => {
+    const tx = db.transaction(store, 'readonly');
+    const req = tx.objectStore(store).getAll();
+    req.onsuccess = () => res(req.result);
+    req.onerror = () => rej();
+  });
+}
+
+async function dbPut(store, obj) {
+  return new Promise((res, rej) => {
+    const tx = db.transaction(store, 'readwrite');
+    const req = tx.objectStore(store).put(obj);
+    req.onsuccess = () => res(req.result);
+    req.onerror = () => rej();
+  });
+}
+
+async function dbDelete(store, id) {
+  return new Promise((res, rej) => {
+    const tx = db.transaction(store, 'readwrite');
+    tx.objectStore(store).delete(id);
+    tx.oncomplete = res;
+    tx.onerror = rej;
+  });
+}
+
+// ── NAVIGATION ──
+function goTo(screen) {
+  prevScreen = currentScreen;
+  document.getElementById('screen-' + currentScreen).classList.remove('active');
+  currentScreen = screen;
+  document.getElementById('screen-' + screen).classList.add('active');
+  if (screen === 'add') initAddForm();
+  if (screen === 'history') renderHistory();
+  if (screen === 'report') renderReport();
+}
+
+function goBack() {
+  goTo(prevScreen === currentScreen ? 'main' : prevScreen);
+}
+
+// ── MEDICINE LIST ──
+async function renderMedicines() {
+  const list = await dbGetAll('medicines');
+  const el = document.getElementById('medicine-list');
+  if (!list.length) {
+    el.innerHTML = `<div class="empty-state"><div class="icon">💊</div><p>Vaistų dar nėra.<br>Paspauskite „Pridėti vaistą".</p></div>`;
+    return;
+  }
+  el.innerHTML = list.map(m => {
+    const times = (m.times || []).join(', ');
+    const days = (m.enabledDays || []).map(d => DAYS[d-1]).join(', ');
+    const imgHtml = m.image
+      ? `<div class="med-img"><img src="${m.image}" alt=""></div>`
+      : `<div class="med-img">💊</div>`;
+    return `
+      <div class="medicine-card">
+        ${imgHtml}
+        <div class="med-info">
+          <div class="med-name">${m.name}</div>
+          <div class="med-times">${times}</div>
+          <div class="med-days">${days}</div>
+        </div>
+        <div class="med-actions">
+          <button class="btn-icon" onclick="editMedicine(${m.id})">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1A6FD4" stroke-width="2.5" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+          <button class="btn-icon delete" onclick="askDelete(${m.id})">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D93025" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+          </button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ── ADD / EDIT FORM ──
+function initAddForm(med = null) {
+  editingId = med ? med.id : null;
+  imageData = med ? med.image : null;
+  selectedDays = med ? (med.enabledDays || [1,2,3,4,5,6,7]) : [1,2,3,4,5,6,7];
+
+  document.getElementById('add-title').textContent = med ? 'Redaguoti vaistą' : 'Pridėti vaistą';
+  document.getElementById('med-name').value = med ? med.name : '';
+  document.getElementById('med-dose').value = med ? (med.dose || '') : '';
+
+  // Image preview
+  const prev = document.getElementById('img-preview');
+  prev.innerHTML = imageData ? `<img src="${imageData}">` : '📷';
+
+  // Times
+  const times = med ? med.times : ['08:00'];
+  renderTimes(times);
+
+  // Days
+  renderDays();
+}
+
+function renderTimes(times) {
+  const el = document.getElementById('times-list');
+  el.innerHTML = times.map((t, i) => `
+    <div class="time-item">
+      <input type="time" class="time-input" value="${t}" id="time-${i}">
+      <button class="btn-icon" onclick="removeTime(${i})" style="width:32px;height:32px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>`).join('');
+}
+
+function addTimeField() {
+  const items = document.querySelectorAll('#times-list .time-item');
+  const times = [...items].map(el => el.querySelector('input').value);
+  times.push('09:00');
+  renderTimes(times);
+}
+
+function removeTime(i) {
+  const items = document.querySelectorAll('#times-list .time-item');
+  if (items.length <= 1) { showToast('Turi būti bent vienas laikas'); return; }
+  const times = [...items].map(el => el.querySelector('input').value);
+  times.splice(i, 1);
+  renderTimes(times);
+}
+
+function renderDays() {
+  const el = document.getElementById('days-grid');
+  el.innerHTML = DAYS.map((d, i) => `
+    <button class="day-btn ${selectedDays.includes(i+1) ? 'active' : ''}" onclick="toggleDay(${i+1})">${d}</button>
+  `).join('');
+}
+
+function toggleDay(d) {
+  if (selectedDays.includes(d)) {
+    if (selectedDays.length === 1) { showToast('Pasirinkite bent vieną dieną'); return; }
+    selectedDays = selectedDays.filter(x => x !== d);
+  } else {
+    selectedDays.push(d);
+    selectedDays.sort();
+  }
+  renderDays();
+}
+
+function handleImage(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    imageData = e.target.result;
+    document.getElementById('img-preview').innerHTML = `<img src="${imageData}">`;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function saveMedicine() {
+  const name = document.getElementById('med-name').value.trim();
+  if (!name) { showToast('Įveskite vaisto pavadinimą'); return; }
+
+  const items = document.querySelectorAll('#times-list .time-item');
+  const times = [...items].map(el => el.querySelector('input').value).filter(Boolean);
+
+  const med = {
+    name,
+    dose: document.getElementById('med-dose').value.trim(),
+    times,
+    enabledDays: selectedDays,
+    image: imageData,
+  };
+
+  if (editingId) med.id = editingId;
+
+  await dbPut('medicines', med);
+  scheduleNotifications(med);
+  showToast(editingId ? '✅ Atnaujinta!' : '✅ Vaistas pridėtas!');
+  goTo('main');
+  renderMedicines();
+}
+
+async function editMedicine(id) {
+  const list = await dbGetAll('medicines');
+  const med = list.find(m => m.id === id);
+  if (!med) return;
+  goTo('add');
+  initAddForm(med);
+}
+
+function askDelete(id) {
+  deleteTargetId = id;
+  document.getElementById('delete-modal').classList.add('open');
+}
+
+async function confirmDelete() {
+  if (!deleteTargetId) return;
+  await dbDelete('medicines', deleteTargetId);
+  closeModal();
+  showToast('🗑 Pašalinta');
+  renderMedicines();
+}
+
+function closeModal() {
+  document.getElementById('delete-modal').classList.remove('open');
+  deleteTargetId = null;
+}
+
+// ── HISTORY ──
+async function renderHistory() {
+  const records = await dbGetAll('history');
+  const medicines = await dbGetAll('medicines');
+  const el = document.getElementById('history-list');
+  if (!records.length) {
+    el.innerHTML = `<div class="empty-state"><div class="icon">📋</div><p>Istorija tuščia.<br>Čia bus rodomi vartojimo įrašai.</p></div>`;
+    return;
+  }
+  const sorted = [...records].sort((a,b) => b.timestamp - a.timestamp);
+  el.innerHTML = sorted.map(r => {
+    const med = medicines.find(m => m.id === r.medicineId);
+    const d = new Date(r.timestamp);
+    const dateStr = d.toLocaleDateString('lt-LT') + ' ' + d.toLocaleTimeString('lt-LT', {hour:'2-digit',minute:'2-digit'});
+    return `
+      <div class="history-item">
+        <div class="history-dot"></div>
+        <div class="history-info">
+          <div class="history-name">${med ? med.name : 'Nežinomas'}</div>
+          <div class="history-time">${dateStr}</div>
+        </div>
+        <div class="history-badge">Išgerta</div>
+      </div>`;
+  }).join('');
+}
+
+// ── REPORT ──
+async function renderReport() {
+  const medicines = await dbGetAll('medicines');
+  const history = await dbGetAll('history');
+  const el = document.getElementById('report-content');
+
+  const cards = medicines.map(m => {
+    const taken = history.filter(h => h.medicineId === m.id).length;
+    const days = (m.enabledDays || []).map(d => DAYS[d-1]).join(', ');
+    return `
+      <div class="report-card">
+        <div class="report-title">💊 ${m.name}</div>
+        <div class="report-row"><span class="report-key">Dozė</span><span class="report-val">${m.dose || '–'}</span></div>
+        <div class="report-row"><span class="report-key">Laikai</span><span class="report-val">${(m.times||[]).join(', ')}</span></div>
+        <div class="report-row"><span class="report-key">Dienos</span><span class="report-val">${days}</span></div>
+        <div class="report-row"><span class="report-key">Išgerta iš viso</span><span class="report-val">${taken} kartų</span></div>
+      </div>`;
+  }).join('');
+
+  el.innerHTML = cards || `<div class="empty-state" style="padding:40px"><div class="icon">📄</div><p>Vaistų nėra – ataskaita tuščia.</p></div>`;
+}
+
+// ── NOTIFICATIONS (iOS bridge ready) ──
+function scheduleNotifications(med) {
+  // iOS WKWebView bridge – Swift pusė priims šį pranešimą
+  if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.scheduleNotification) {
+    med.times.forEach(time => {
+      window.webkit.messageHandlers.scheduleNotification.postMessage({
+        id: `med_${med.id}_${time}`,
+        title: '💊 Laikas gerti vaistą',
+        body: med.name + (med.dose ? ' – ' + med.dose : ''),
+        time: time,
+        days: med.enabledDays,
+        reminders: [
+          { delay: 0,   text: `💊 Laikas gerti vaistą` },
+          { delay: 300, text: `⏰ Priminimas: ${med.name} dar nepatvirtintas` },
+          { delay: 900, text: `❗ Svarbu: nepraleiskite dozės` }
+        ]
+      });
+    });
+  }
+
+  // Web fallback – Notification API (Android WebView)
+  if ('Notification' in window) {
+    Notification.requestPermission().then(perm => {
+      if (perm === 'granted') {
+        scheduleWebNotifications(med);
+      }
+    });
+  }
+}
+
+function scheduleWebNotifications(med) {
+  med.times.forEach(time => {
+    const [h, m] = time.split(':').map(Number);
+    const now = new Date();
+    const target = new Date();
+    target.setHours(h, m, 0, 0);
+    if (target <= now) target.setDate(target.getDate() + 1);
+    const delay = target - now;
+    setTimeout(() => {
+      new Notification('💊 ' + med.name, { body: 'Laikas gerti vaistą' + (med.dose ? ': ' + med.dose : '') });
+    }, delay);
+  });
+}
+
+// ── TOAST ──
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ── INIT ──
+async function init() {
+  db = await openDB();
+  const firstLaunch = !localStorage.getItem('ml_launched');
+  if (!firstLaunch) {
+    goTo('main');
+    renderMedicines();
+  }
+  // Mark launched
+  localStorage.setItem('ml_launched', '1');
+
+  // Listen for iOS notification confirmations
+  window.medlaikasNotificationConfirmed = function(medId, time) {
+    dbPut('history', { medicineId: parseInt(medId), timestamp: Date.now() });
+    renderMedicines();
+    showToast('✅ Patvirtinta!');
+  };
+}
+
+// Welcome button also marks & renders
+document.querySelector('#screen-welcome .btn-welcome').addEventListener('click', () => {
+  renderMedicines();
+});
+
+init();
+</script>
+</body>
+</html>
