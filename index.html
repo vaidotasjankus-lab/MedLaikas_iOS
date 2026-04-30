@@ -2,9 +2,11 @@
 <html lang="lt">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-touch-fullscreen" content="yes">
+<meta name="format-detection" content="telephone=no">
 <title>MedLaikas</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1A6FD4">
@@ -28,17 +30,53 @@
 
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
+  html, body {
+    height: 100%;
+    overflow: hidden; /* bounce scroll fix */
+    position: fixed;
+    width: 100%;
+  }
+
   body {
     font-family: 'Nunito', sans-serif;
     background: var(--bg);
     color: var(--text);
-    min-height: 100vh;
-    overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
+    /* Teksto pasirinkimo blokavimas */
+    -webkit-user-select: none;
+    user-select: none;
+    /* Ilgo paspaudimo meniu blokavimas */
+    -webkit-touch-callout: none;
+    /* Paryškinimo blokavimas */
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Input laukuose leidžiame pasirinkti tekstą */
+  input, textarea {
+    -webkit-user-select: text;
+    user-select: text;
+    /* 16px būtinas – mažesnis sukelia zoom iOS */
+    font-size: 16px !important;
+    -webkit-touch-callout: default;
+    /* Išjungiame auto-formatavimą */
+    -webkit-appearance: none;
+    border-radius: 12px;
+  }
+
+  /* Nuotraukų ilgo paspaudimo blokavimas */
+  img {
+    -webkit-touch-callout: none;
+    pointer-events: none;
   }
 
   /* ── SCREENS ── */
-  .screen { display: none; min-height: 100vh; flex-direction: column; }
+  .screen {
+    display: none;
+    height: 100vh;
+    height: -webkit-fill-available;
+    flex-direction: column;
+    overflow: hidden;
+  }
   .screen.active { display: flex; }
 
   /* ── WELCOME SCREEN ── */
@@ -46,19 +84,19 @@
     background: linear-gradient(160deg, #1A6FD4 0%, #1558B0 60%, #0e3f85 100%);
     align-items: center;
     justify-content: center;
-    padding: 40px 32px;
+    padding: clamp(24px, 6vh, 48px) 32px;
     text-align: center;
   }
 
   .welcome-logo {
-    width: 110px;
-    height: 110px;
+    width: clamp(80px, 18vw, 120px);
+    height: clamp(80px, 18vw, 120px);
     background: rgba(255,255,255,0.18);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto 32px;
+    margin: 0 auto clamp(16px, 4vh, 32px);
     animation: pulse 2.5s ease-in-out infinite;
   }
 
@@ -67,32 +105,32 @@
     50% { box-shadow: 0 0 0 18px rgba(255,255,255,0); }
   }
 
-  .welcome-logo svg { width: 62px; height: 62px; }
+  .welcome-logo svg { width: clamp(44px, 10vw, 64px); height: clamp(44px, 10vw, 64px); }
 
   .welcome-title {
-    font-size: 38px;
+    font-size: clamp(28px, 8vw, 40px);
     font-weight: 900;
     color: #fff;
     letter-spacing: -0.5px;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
   }
 
   .welcome-sub {
-    font-size: 17px;
+    font-size: clamp(14px, 4vw, 18px);
     color: rgba(255,255,255,0.78);
     font-weight: 600;
-    margin-bottom: 64px;
+    margin-bottom: clamp(20px, 4vh, 40px);
   }
 
   .btn-welcome {
     width: 100%;
-    padding: 18px;
+    padding: clamp(14px, 3vh, 20px);
     background: #fff;
     color: var(--blue);
     border: none;
     border-radius: 14px;
     font-family: 'Nunito', sans-serif;
-    font-size: 17px;
+    font-size: clamp(14px, 4vw, 17px);
     font-weight: 800;
     letter-spacing: 1px;
     cursor: pointer;
@@ -566,9 +604,72 @@
   .modal-btn.primary { background: var(--blue); color: #fff; }
   .modal-btn.danger { background: #fdf0ef; color: var(--red); }
   .modal-btn.cancel { background: var(--bg); color: var(--text-secondary); }
+
+  /* ── RESPONSIVE – iPhone SE (mažas ~375px, ~667px aukštis) ── */
+  @media (max-height: 680px) {
+    .action-grid { gap: 8px; padding-top: 14px; }
+    .btn-primary { padding: 13px; font-size: 14px; }
+    .btn-secondary { padding: 11px 8px; font-size: 12px; }
+    .btn-green { padding: 13px; font-size: 14px; }
+    .btn-outline { padding: 11px; font-size: 12px; }
+    .hero { padding-bottom: 16px; }
+    .hero-name { font-size: 22px; }
+    .medicine-list { gap: 8px; padding: 12px; }
+    .medicine-card { padding: 10px; }
+    .med-img { width: 52px; height: 52px; }
+    .med-name { font-size: 14px; }
+    .med-times { font-size: 15px; }
+  }
+
+  /* ── RESPONSIVE – iPhone 16 Pro Max (didelis ~430px, ~932px aukštis) ── */
+  @media (min-height: 850px) {
+    .action-grid { gap: 14px; padding-top: 24px; }
+    .btn-primary { padding: 20px; font-size: 16px; }
+    .btn-secondary { padding: 18px 12px; font-size: 14px; }
+    .btn-green { padding: 20px; font-size: 16px; }
+    .hero-name { font-size: 30px; }
+    .medicine-card { padding: 18px; }
+    .med-img { width: 72px; height: 72px; }
+    .med-name { font-size: 17px; }
+    .med-times { font-size: 19px; }
+  }
+
+  /* ── RESPONSIVE – plotis (iPad ir dideli telefonai) ── */
+  @media (min-width: 430px) {
+    .action-grid { padding-left: 20px; padding-right: 20px; }
+    .medicine-list { padding: 16px 20px; }
+    .form-content { padding: 24px 20px; }
+  }
+
+  @media (min-width: 600px) {
+    body { max-width: 480px; margin: 0 auto; }
+    #screen-welcome { padding-left: 48px; padding-right: 48px; }
+  }
 </style>
 </head>
 <body>
+
+<!-- SPLASH – užkrovimo ekranas, slepiamas kai JS pasiruošia -->
+<div id="splash" style="
+  position: fixed; inset: 0; z-index: 9999;
+  background: linear-gradient(160deg, #1A6FD4 0%, #1558B0 60%, #0e3f85 100%);
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: 16px;
+  transition: opacity 0.4s ease;
+">
+  <div style="
+    width: 90px; height: 90px; border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    display: flex; align-items: center; justify-content: center;
+  ">
+    <svg width="50" height="50" viewBox="0 0 62 62" fill="none">
+      <circle cx="31" cy="31" r="28" fill="rgba(255,255,255,0.25)" stroke="white" stroke-width="2.5"/>
+      <rect x="14" y="28" width="34" height="6" rx="3" fill="white"/>
+      <path d="M22 22 Q31 14 40 22" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <div style="color:#fff;font-size:22px;font-weight:900;letter-spacing:-0.5px">MedLaikas</div>
+</div>
 
 <!-- WELCOME -->
 <div id="screen-welcome" class="screen active">
@@ -745,6 +846,37 @@ let selectedDays = [1,2,3,4,5,6,7];
 let imageData = null;
 
 const DAYS = ['Pr','An','Tr','Ke','Pe','Še','Se'];
+
+// ── SWIPE BACK GESTAS ──
+let touchStartX = 0;
+let touchStartY = 0;
+
+document.addEventListener('touchstart', e => {
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+}, { passive: true });
+
+document.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  const dy = Math.abs(e.changedTouches[0].clientY - touchStartY);
+  // Braukimas iš kairės krašto (pirmi 30px) į dešinę >60px
+  if (touchStartX < 30 && dx > 60 && dy < 80) {
+    const backScreens = ['add', 'history', 'report'];
+    if (backScreens.includes(currentScreen)) goBack();
+  }
+}, { passive: true });
+
+// ── KLAVIATŪROS ELGESYS ──
+// Kai atsidaro klaviatūra – scrolliname aktyvų input į matomą zoną
+document.addEventListener('focusin', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+    setTimeout(() => {
+      e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 350); // laukiame kol klaviatūra atsidaro
+  }
+});
+
+
 
 // ── DB ──
 function openDB() {
@@ -1212,6 +1344,12 @@ async function init() {
 
   // Paleidžiame laikmatį welcome ekrane
   startWelcomeTimer();
+
+  // Slepiame splash ekraną
+  setTimeout(() => {
+    const splash = document.getElementById('splash');
+    if (splash) { splash.style.opacity = '0'; setTimeout(() => splash.remove(), 400); }
+  }, 600);
   if ('Notification' in window && Notification.permission === 'default') {
     Notification.requestPermission().then(p => {
       if (p === 'granted') showToast('✅ Pranešimai įjungti!');
